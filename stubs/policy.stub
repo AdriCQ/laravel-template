@@ -1,0 +1,92 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Auth\Access\Response;
+use App\Enums\Constants;
+use {{ namespacedModel }};
+use {{ namespacedUserModel }};
+
+class {{ class }}
+{
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny({{ user }} $user): bool
+    {
+        return $this->isSudoUser($user);
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        return $this->isSudoUser($user) || $this->belongsToUser($user, ${{ modelVariable }});
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create({{ user }} $user): bool
+    {
+        return true;
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        return $this->isSudoUser($user) || $this->belongsToUser($user, ${{ modelVariable }});
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        return $this->isSudoUser($user) || $this->belongsToUser($user, ${{ modelVariable }});
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        return $this->isSudoUser($user);
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        return $this->isSudoUser($user);
+    }
+
+
+    /**
+     * isSudoUser
+     *
+     * @param  User $user
+     * @return bool
+     */
+    private function isSudoUser(User $user): bool
+    {
+        return $user->hasAnyRole([Constants::ROLE_ADMIN, Constants::ROLE_DEVELOPER]);
+    }
+
+    /**
+     * belongsToUser
+     * @param  User $user
+     * @param  Store $model
+     * @return bool
+     */
+    private function belongsToUser(User $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        if ($this->isSudoUser($user))
+            return true;
+        return ${{ modelVariable }}->owner->id === $user->id;
+    }
+}

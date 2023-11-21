@@ -1,0 +1,85 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ namespacedModel }};
+use App\Http\Resources\{{ model }}Response;
+use {{ rootNamespace }}Http\Controllers\Controller;
+use App\Enums\Constants;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
+
+
+class {{ class }} extends Controller
+{
+    /**
+     * {{ class }} constructor
+     */
+    public function __construct()
+    {
+        $this->middleware(['auth:sanctum']);
+        $this->authorizeResource({{ model }}::class, 'model');
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): AnonymousResourceCollection
+    {
+        return {{ model }}Response::collection(
+            {{ model }}::query()->simplePaginate(Constants::ELEMENTS_PER_PAGE)
+        );
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * @param CreateRequest $request
+     * @return {{ model }}Response
+     */
+    public function store(CreateRequest $request): {{ model }}Response
+    {
+        $validated = $request->validated();
+
+        $model = {{ model }}::create($validated);
+
+        return new {{ model }}Response($model);
+    }
+
+    /**
+     * Show the specified resource.
+     * @param {{ model }} $model
+     * @return {{ model }}Response
+     */
+    public function show({{ model }} $model): {{ model }}Response
+    {
+        return new {{ model }}Response($model);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     * @param UpdateRequest $request
+     * @param {{ model }} $model
+     * @return {{ model }}Response
+     */
+    public function update(UpdateRequest $request, {{ model }} $model): {{ model }}Response
+    {
+        $validated = $request->validated();
+
+        $model->update($validated);
+
+        return new {{ model }}Response($model);
+    }
+
+    /**
+     * destroy
+     * @param \App\Models\{{ model }} $model
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy({{ model }} $model): JsonResponse
+    {
+        return $model->delete()
+            ? new {{ model }}Response($model)
+            : response()->json(null, Response::HTTP_BAD_REQUEST);
+    }
+}
